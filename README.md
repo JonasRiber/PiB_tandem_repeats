@@ -1,5 +1,5 @@
-### PiB_tandem_repeats
-## By Jonas Riber Jørgensen
+# PiB_tandem_repeats
+### By Jonas Riber Jørgensen
 
 This is a project focussed on algorithms for recogizing repeating patterns in strings to find tandem repeats.
 Algorithms included:
