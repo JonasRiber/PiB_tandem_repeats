@@ -5,6 +5,7 @@ This is a project focussed on algorithms for recogizing repeating patterns in st
 Algorithms included:
 
   - Brute force approach
+
     Iteratively find all the tandem repeats
     
   - McCreights algorithm (to be done)
