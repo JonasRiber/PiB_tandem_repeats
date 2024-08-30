@@ -3,7 +3,7 @@
 ### Brute force approach to finding tandem repeats in a sequence 
 ## By Jonas Riber Jørgensen, 2024
 
-def find_tandem_repeats(s):
+def brute_force_tandem_repeats(s):
     n = len(s)
     repeats = []
 
@@ -32,6 +32,6 @@ def find_tandem_repeats(s):
 #######################
 
 string = "abcabcabcabcxyzxyz"
-print(find_tandem_repeats(string))
+print(brute_force_tandem_repeats(string))
 
 # [('abc', 4), ('bca', 3), ('cab', 3), ('abc', 3), ('bca', 2), ('cab', 2), ('abc', 2), ('xyz', 2), ('abcabc', 2)]
