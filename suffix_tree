@@ -1,0 +1,22 @@
+digraph {
+	"" -> b
+	b [label="banana$ (0)"]
+	"" -> a
+	a [label=a]
+	a -> an
+	an [label=na]
+	an -> ann
+	ann [label="na$ (1)"]
+	an -> "an$"
+	"an$" [label="$ (3)"]
+	a -> "a$"
+	"a$" [label="$ (5)"]
+	"" -> n
+	n [label=na]
+	n -> nn
+	nn [label="na$ (2)"]
+	n -> "n$"
+	"n$" [label="$ (4)"]
+	"" -> "$"
+	"$" [label="$ (6)"]
+}
