@@ -1,4 +1,4 @@
-
+from graphviz import Digraph
 
 class Node(object):
     def __init__(self, start=None, end=None, suffix_number=None, parent=None):
