@@ -1,4 +1,4 @@
-def find_btr(sequence):
+def find_repeats(sequence):
     """
     finds all Tandem repeats within a string
     validate it ????
