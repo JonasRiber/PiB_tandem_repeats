@@ -112,7 +112,9 @@ class SuffixTree:
                     dot.node(child_id, "", style="filled", color="lightgrey")  # Internal nodes remain unlabeled
             
             #edge label
-            label = self.string[child.start:child.end]
+            #label = self.string[child.start:child.end]     # write the string labels
+            #label = f"({child.start}, {child.end})"         # write the idx on labels
+            label = self.string[child.start:child.end] + f" ({child.start}, {child.end})" 
             dot.edge(node_id, child_id, label=label)
 
             # Recursively add edges for the child
@@ -153,18 +155,16 @@ class SuffixTree:
 
             for child in node.children.values(): # look at
                 edge_label = self.string[child.start:child.end]
-
                 dfs(child, current_path + edge_label) # recussively search tree
 
-        # initiate search
-        dfs(self.root, "")
-
+        dfs(self.root, "") # initiate search
         return suffixes
    
     def count_outgoing_edges(self):
         """
         Count the number of outgoing edges for internal nodes. internal nodes can minimum have 2 
         children, and at max have the same as number of unique symbols in the stirng.
+        Returns nodes that fail these criteria
         """
         # define criteria
         min_children = 2
@@ -176,13 +176,14 @@ class SuffixTree:
             if not node.children: # no children, so its a leaf
                 return 
 
+            for child in node.children.values():
+                dfs(child) # recursively move out branch
+
             # check if number of children is correct
             num_children = len(node.children)
             if num_children < min_children or num_children > max_children:
                 failed_nodes.append(node)
 
-            for child in node.children.values():
-                dfs(child) # recursively move out branch
             return
         
         dfs(self.root)
@@ -198,6 +199,9 @@ class SuffixTree:
         def dfs(node):
             if not node.children: # no children, so its a leaf
                 return 
+            
+            for child in node.children.values():
+                dfs(child) # recursively move out branch
 
             # check if all children are unique
             all_children = list(node.children.values())
@@ -206,9 +210,6 @@ class SuffixTree:
             if unique_check == False:
                 failed_nodes.append(node)
 
-            for child in node.children.values():
-                dfs(child) # recursively move out branch
-        
         dfs(self.root)
         return failed_nodes
     
@@ -222,6 +223,10 @@ class SuffixTree:
         failed_nodes = []
 
         def dfs(node):
+            #recursively visit all children
+            for child in node.children.values():
+                dfs(child)
+
             if node in visit_counts:
                 visit_counts[node] += 1
             else:
@@ -229,48 +234,111 @@ class SuffixTree:
 
             if visit_counts[node] > 1:
                 failed_nodes.append(node)            
-
-            #recursively visit all children
-            for child in node.children.values():
-                dfs(child)
             
         dfs(self.root) # initialize recursion
         return failed_nodes
     
 
 #################################
-### repeat search - functions ###
+### helper functions ###
     def df_numbering(self):
         '''
         Does a depth-first search through the tree and adds the ordering to the leaves
         df_number is added to the node objects and two lists of corosponding suffix- and df-numbering
-        is returned. 
+        is returned. Additionally also adds a leaflist of the depth-first numbers to each internal node.
         '''
         count = [0] #mutable counter
         df_list = []
         suffix_list = []
 
-
         def dfs(node):
             if not node.children: #base case: no children, so its a leaf
                 node.df_number = count[0]
+                node.leaf_range = (count[0], count[0]) # [count[0]]
                 count[0] += 1
                 df_list.append(node.df_number)
                 suffix_list.append(node.suffix_number)
-                return
+                return node.leaf_range
 
             # visit all children
+            min_df = float("inf") #leaf_list = []
+            max_df = -float("inf") 
+
             for child in node.children.values():
-                dfs(child) # recursively move out branch
+                # leaf_list.extend(dfs(child)) # recursively move out branch
+                child_leaf_range = dfs(child)
+                min_df = min(min_df, child_leaf_range[0])
+                max_df = max(min_df, child_leaf_range[1])
+
+            node.leaf_range = (min_df, max_df) # node.leaf_list = leaf_list
+
+            return node.leaf_range # leaf_list
         
         dfs(self.root)
         return suffix_list, df_list
-
     
-# test_string = "mississippi"
 
-# suffix_tree = SuffixTree(test_string)
-# s_list, df_list = suffix_tree.df_numbering()
+    def df_numbering_non_recursive(self):
+        """
+        The recursive version above gave some issues during testing, so a iterative version using a stack was made instead
+        """
+        count = 0
+        df_list = []
+        s_list = []
+        
+        stack = [(self.root, None, None)]  # #stack to store (current node, parent min_df, parent max_df)
+        visited_children = {}  # Map each node to the index of the next child to visit
+        
+        while stack: #ends when stack is empty
+            node, min_df, max_df = stack.pop()
+            
+            if not node.children:  # leafndoe
+                node.df_number = count
+                node.leaf_range = (count, count)
+                df_list.append(node.df_number)
+                s_list.append(node.suffix_number)
+                count += 1
+                continue
+            
+            # Initialize visited children tracking for each internal node on first visit
+            if node not in visited_children:
+                visited_children[node] = 0
+                min_df, max_df = float("inf"), -float("inf")
+            
+            # Process the next child of the current node
+            children = list(node.children.values())
+            if visited_children[node] < len(children):
+                child = children[visited_children[node]]
+                visited_children[node] += 1
+                # Push the node back to stack to revisit after its child is processed
+                stack.append((node, min_df, max_df))
+                # Push child to stack for further processing
+                stack.append((child, None, None))
+            else:
+                #update min and max depthfirst numbers for internal nodes after visiting all children
+                for child in children:
+                    min_df = min(min_df, child.leaf_range[0])
+                    max_df = max(max_df, child.leaf_range[1])
+                node.leaf_range = (min_df, max_df)
+        
+        return s_list, df_list
 
-# print(s_list, f"\n{df_list}")
-# suffix_tree.visualize()
+    def tree_depth(self):
+        """
+        Function to get the greatest depth in the tree. loops through a stack to do so.
+        """
+        if not self.root:
+            return 0
+        stack = [(self.root, 0)]    #stack to store (node, depth)
+        max_depth = 0
+
+        while stack: #ends if stack is empty
+            node, depth = stack.pop()
+            if not node.children: # node is leaf, if greater than max -> update max
+                max_depth = max(max_depth, depth)
+            else:
+                # node has child, add children to stack and add +1 to depth
+                for child in node.children.values():
+                    stack.append((child, depth + 1))
+
+        return max_depth
