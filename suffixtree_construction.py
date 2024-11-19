@@ -1,4 +1,5 @@
 from graphviz import Digraph
+import os
 
 class Node(object):
     def __init__(self, start=None, end=None, suffix_number=None, parent=None):
@@ -87,7 +88,7 @@ class SuffixTree:
                       edge_attr={'fontsize': '15', 'fontcolor': 'red', 'labelfontsize': '10', 
                                  'labeldistance': '1', 'labelangle': '0'})
         self.add_edges(dot, self.root, node_id="root")
-        dot.render(filename, format='png', cleanup=True)    # saves an image of the tree in root folder
+        dot.render(os.path.join("Trees/",filename), format='png', cleanup=True)    # saves an image of the tree in root folder
         print(f"Visualization saved as {filename}.png")
         return dot
 
