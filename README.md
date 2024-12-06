@@ -27,7 +27,7 @@ Additional scripts:
   .py script version of the naive suffix tree construction from the suffix_tree_construction.ipynb notebook
 
   - **repeat_search_speedup.py**  
-  Stoyeand Gusfield algorithm
+  Stoyeand Gusfield algorithm  
   .py script version of the repeats search algorithm from the suffix_tree_construction.ipynb notebook
 
 
